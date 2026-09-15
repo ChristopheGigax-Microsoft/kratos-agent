@@ -117,6 +117,10 @@ not lint.
   mypy relaxations are documented in `pyproject.toml` — extend that list rather than sprinkling
   `# type: ignore`.
 - Container images build in ACR (`remoteBuild: true`), never locally. Don't "simplify" this back.
+- Every azd hook carries both a `posix:` and a `windows:` variant (`hooks/*.sh` + `hooks/*.ps1`),
+  and `*.sh` is pinned to LF in `.gitattributes`. Both are load-bearing on Windows — see the
+  hook rules in [AGENTS.md](AGENTS.md). Test either side with
+  `azd hooks run <name> --platform windows|posix`.
 - Optional services need a `condition:` in `azure.yaml` kept in sync with
   `infra/main.parameters.json` (see `obo-mcp-server` / `DEPLOY_OBO`).
 - Packages that pin each other exactly (`pydantic`/`pydantic-core`, `react`/`react-dom`) must stay

@@ -134,11 +134,34 @@ Azure services provisioned via `azd up`:
 
 ### Prerequisites
 
-- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) ≥1.12
-- [Azure CLI](https://learn.microsoft.com/cli/azure/)
-- [Docker](https://www.docker.com/)
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) **≥1.28** — `azure.yaml` uses `condition:`, which older versions silently ignore
+- The `azure.ai.agents` azd extension, at a version compatible with your `azd`. Check with `azd extension list --installed`: a `⚠ Incompatible` status means the hosted agent (`host: azure.ai.agent`) cannot deploy at all. Fix with `azd extension upgrade azure.ai.agents`.
+- [Azure CLI](https://learn.microsoft.com/cli/azure/) — sign in to **both**: `az login` *and* `azd auth login` (separate token caches)
 - [Node.js 20+](https://nodejs.org/)
 - [Python 3.11+](https://www.python.org/)
+- [Docker](https://www.docker.com/) — **not** required to deploy: all three images set `remoteBuild: true` and build in ACR. Only needed for the local docker-compose stack.
+
+#### On Windows
+
+`azd up` is supported from **PowerShell 7** (`pwsh`) — every hook ships a `windows:` variant
+that runs `hooks/*.ps1`. Two things to know:
+
+- **PowerShell 7 is required**, not Windows PowerShell 5.1. Check with `pwsh --version`.
+- **No skills-upload menu.** The POSIX hook prompts for which use-cases to upload to blob
+  storage; the Windows one never prompts (it would block the deploy — see
+  [hooks/select-use-cases.ps1](hooks/select-use-cases.ps1)). It records "none", which costs
+  nothing: the backend seeds the same use-cases from its container image at startup. To
+  upload anyway:
+
+  ```powershell
+  $env:KRATOS_UPLOAD_USE_CASES = "all"   # or a comma-separated list
+  azd up
+  # ...or after the fact:
+  ./hooks/postdeploy.ps1
+  ```
+
+Cloning on Windows requires no special git settings — `.gitattributes` pins `*.sh` to LF, so
+the POSIX hooks survive a checkout even with `core.autocrlf=true`.
 
 ### Deploy to Azure
 
