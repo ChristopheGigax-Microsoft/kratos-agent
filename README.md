@@ -135,7 +135,12 @@ Azure services provisioned via `azd up`:
 ### Prerequisites
 
 - [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/) **≥1.28** — `azure.yaml` uses `condition:`, which older versions silently ignore
-- The `azure.ai.agents` azd extension, at a version compatible with your `azd`. Check with `azd extension list --installed`: a `⚠ Incompatible` status means the hosted agent (`host: azure.ai.agent`) cannot deploy at all. Fix with `azd extension upgrade azure.ai.agents`.
+- The `azure.ai.agents` azd extension, at a version compatible with your `azd`. Check with `azd extension list --installed`: an `⚠ Incompatible` status means the hosted agent (`host: azure.ai.agent`) cannot deploy at all. Fix with `azd extension update --all`.
+
+  > Updating a single extension is often not enough: `azure.ai.agents` pins `azure.ai.connections`
+  > (`~1.0.0-beta.6` at the time of writing), and installing it against an older
+  > `azure.ai.connections` fails with `installed dependency ... does not satisfy constraint`.
+  > `azd extension update --all` keeps the set consistent.
 - [Azure CLI](https://learn.microsoft.com/cli/azure/) — sign in to **both**: `az login` *and* `azd auth login` (separate token caches)
 - [Node.js 20+](https://nodejs.org/)
 - [Python 3.11+](https://www.python.org/)
