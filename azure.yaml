@@ -232,13 +232,21 @@ hooks:
             Write-Host "KRATOS_BUILD_TS=$BuildTs (forces new hosted-agent version)"
     preprovision:
       posix:
-        # Ask which skills to upload here, at the very start, rather than at
+        # check-azure-prereqs.sh runs first and exits non-zero if the
+        # subscription is missing the Container Apps VNet feature. Failing here
+        # costs seconds and provisions nothing; failing without it costs ~15
+        # minutes and leaves a half-created Container Apps environment that has
+        # to be deleted by hand.
+        #
+        # Then: ask which skills to upload, at the very start rather than at
         # upload time. azd repaints its progress table over anything a hook
         # prints once the run is under way, which was swallowing the menu and
         # the prompt. hooks/postdeploy.sh reads the answer and uploads without
         # prompting.
         shell: sh
-        run: ./hooks/select-use-cases.sh
+        run: |
+            ./hooks/check-azure-prereqs.sh || exit 1
+            ./hooks/select-use-cases.sh
         interactive: true
       windows:
         # No menu on Windows: the posix script drives it through /dev/tty, which
@@ -247,5 +255,8 @@ hooks:
         # force the upload with KRATOS_UPLOAD_USE_CASES. Not interactive, so azd
         # hands it no terminal to block on.
         shell: pwsh
-        run: ./hooks/select-use-cases.ps1
+        run: |
+            ./hooks/check-azure-prereqs.ps1
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            ./hooks/select-use-cases.ps1
         interactive: false

@@ -146,6 +146,32 @@ Azure services provisioned via `azd up`:
 - [Python 3.11+](https://www.python.org/)
 - [Docker](https://www.docker.com/) — **not** required to deploy: all three images set `remoteBuild: true` and build in ACR. Only needed for the local docker-compose stack.
 
+#### Subscription prerequisites (checked automatically)
+
+The Container Apps environment joins a custom VNet, which requires the
+`Microsoft.Network/AllowBringYourOwnPublicIpAddress` feature and the
+`Microsoft.ContainerService` provider to be registered **on your subscription**. These are
+not enabled by default on every subscription, and this is a property of the subscription —
+not of your machine or OS.
+
+`hooks/check-azure-prereqs.sh` / `.ps1` runs at `preprovision` and handles this for you:
+it checks both, registers whatever is missing, waits for the feature to become active, and
+stops **before anything is provisioned** if it takes too long.
+
+Left unchecked, a missing feature surfaces ~15 minutes into `azd up` as a misleading
+`A resource with this name already exists or is in a conflicting state` (the real cause,
+`SubscriptionNotRegisteredForFeature`, is buried in the ARM deployment details) — and leaves
+a half-created Container Apps environment that must be deleted by hand before any retry can
+succeed.
+
+```bash
+KRATOS_PREREQ_TIMEOUT_MIN=45 azd up   # wait longer than the 15-minute default
+KRATOS_SKIP_PREREQ_CHECK=1 azd up     # skip the check entirely
+```
+
+If you lack permission to register features (Contributor or Owner is required), the hook
+prints the exact commands for an administrator to run.
+
 #### On Windows
 
 `azd up` is supported from **PowerShell 7** (`pwsh`) — every hook ships a `windows:` variant
