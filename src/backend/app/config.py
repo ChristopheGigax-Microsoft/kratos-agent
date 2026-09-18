@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # uses the Responses API (see CopilotAgent._build_provider_config) and passes
     # this through on every session. Empty string = don't send it, i.e. inherit the
     # deployment's own default.
-    reasoning_effort: Literal["", "low", "medium", "high", "xhigh"] = "medium"
+    reasoning_effort: Literal["", "low", "medium", "high", "xhigh"] = "low"
 
     # Optional: route the LLM calls through the APIM AI gateway instead of straight
     # to the AI Services account. When set, the Copilot SDK provider base_url uses
