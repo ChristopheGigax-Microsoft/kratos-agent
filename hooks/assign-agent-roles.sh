@@ -121,6 +121,7 @@ if [ "$AZ_TENANT" != "$SUB_TENANT" ]; then
   echo "     subscription's home tenant : ${SUB_TENANT}"
   echo "     az CLI active tenant       : ${AZ_TENANT}"
   echo "   Fix: az account set --subscription ${SUBSCRIPTION_ID}"
+  echo "        (or, if that does not switch directory: az login --tenant ${SUB_TENANT})"
   exit 1
 fi
 

@@ -176,10 +176,12 @@ hooks:
         # user at the end of a deploy. Belt and braces with --from-deploy above.
       windows:
         shell: pwsh
-        # Both scripts always exit 0 and report their own problems, so neither
-        # can fail the deploy — the sh branch gets the same effect with `|| echo`.
+        # Neither script may fail the deploy. assign-agent-roles.ps1 exits 1 on a
+        # real failure (as the .sh does), so its exit code is reported and
+        # swallowed here — the same effect the sh branch gets with `|| echo`.
         run: |
             ./hooks/assign-agent-roles.ps1
+            if ($LASTEXITCODE -ne 0) { Write-Host "⚠️  Agent role assignment had issues (see above); continuing." }
             ./hooks/postdeploy.ps1 -FromDeploy
         # Same rule as posix: never interactive at the end of a deploy.
     postprovision:
