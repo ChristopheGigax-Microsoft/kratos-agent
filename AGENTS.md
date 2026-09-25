@@ -141,6 +141,11 @@ Gotchas that have bitten before:
   needed. Note that when both branches are present, azd forbids `run`, `shell`,
   `kind`, `dir`, `interactive`, `continueOnError`, `secrets` and `config` at the
   parent level.
+  The `hooks-lint` job in `ci.yml` (`.github/scripts/check-hooks.py`) enforces
+  the static half of this: both variants present, a `.ps1` for every `.sh`,
+  every `.sh` committed executable, `shellcheck` clean, and every `.ps1` and
+  inline `windows:` block parseable. It cannot tell you the two branches
+  *behave* the same — that still needs the `azd hooks run` check above.
 - `*.sh` must stay LF. `.gitattributes` pins this because a Windows clone with
   the default `core.autocrlf=true` otherwise checks the hooks out as CRLF,
   which breaks them before they run (`#!/usr/bin/env bash\r` → `bash\r: No such
